@@ -2,6 +2,7 @@
 
 Features
 
+
 1)REST API
 
 2)JWT authentication
@@ -12,7 +13,9 @@ Features
 
 5)JWT filter based
 
+
 Technologies
+
 
 1)Spring boot
 
