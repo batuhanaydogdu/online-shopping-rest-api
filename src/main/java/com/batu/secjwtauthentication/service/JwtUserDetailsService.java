@@ -9,9 +9,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.batu.secjwtauthentication.dao.UserDao;
+import com.batu.secjwtauthentication.business.dto.UserDTO;
 import com.batu.secjwtauthentication.model.DAOUser;
-import com.batu.secjwtauthentication.model.UserDTO;
+import com.batu.secjwtauthentication.repository.CartDao;
+import com.batu.secjwtauthentication.repository.UserDao;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
@@ -21,14 +22,17 @@ public class JwtUserDetailsService implements UserDetailsService {
 
 	@Autowired
 	private PasswordEncoder bcryptEncoder;
-
+	@Autowired
+	private CartDao cartDao;
+	
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		DAOUser user = userDao.findByUsername(username);
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		DAOUser user = userDao.findByEmail(email);
 		if (user == null) {
-			throw new UsernameNotFoundException("User not found with username: " + username);
+			throw new UsernameNotFoundException("User not found with email: " + email);
 		}
-		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+		
+		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
 				new ArrayList<>());
 	}
 	
@@ -36,6 +40,17 @@ public class JwtUserDetailsService implements UserDetailsService {
 		DAOUser newUser = new DAOUser();
 		newUser.setUsername(user.getUsername());
 		newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
+		newUser.setRole(user.getRole());
+		newUser.setEmail(user.getEmail());
+		newUser.setAddress(user.getAddress());
+		if(user.getCartId()!=null) {
+			newUser.setCart(cartDao.findById(user.getCartId()).get());
+			
+			
+		}
+		
+		
+		
 		return userDao.save(newUser);
 	}
 }
